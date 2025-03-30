@@ -1,9 +1,9 @@
 <resources>
     <style name="Theme.MBLoader" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/white</item>
-        <item name="colorPrimaryDark">#1C1C1C</item>
-        <item name="colorAccent">#2196F3</item>
+        <item name="colorPrimaryDark">@color/background</item>
+        <item name="colorAccent">@color/primary</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:statusBarColor">#1C1C1C</item>
+        <item name="android:statusBarColor">@color/background</item>
     </style>
 </resources> 
