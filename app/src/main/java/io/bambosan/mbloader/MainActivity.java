@@ -32,6 +32,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        Toast.makeText(this, "Modded By xzyyy", Toast.LENGTH_SHORT).show();
 
         TextView listener = findViewById(R.id.listener);
         Button  mbl2_button = findViewById(R.id.mbl2_load);
@@ -63,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 startLauncher(handler, listener, "launcher_draco.dex", MC_PACKAGE_NAME);    
             }
         });    
-}
+    }
     private void startLauncher(Handler handler, TextView listener, String launcherDexName, String mcPackageName) {    
         Executors.newSingleThreadExecutor().execute(() -> {
             try {

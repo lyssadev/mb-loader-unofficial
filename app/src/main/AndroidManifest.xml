@@ -107,10 +107,11 @@
         </activity>
         <activity
             android:name="com.mojang.minecraftpe.Launcher"
+            android:exported="true"
+            android:permission="io.bambosan.mbloader.LAUNCH_MINECRAFT"
             android:alwaysRetainTaskState="true"
             android:configChanges="fontScale|density|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc"
             android:excludeFromRecents="false"
-            android:exported="false"
             android:launchMode="singleTask"
             android:screenOrientation="sensorLandscape"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
@@ -199,5 +200,10 @@
                     android:resource="@xml/file_provider_paths"/>
         </provider>
     </application>
+
+    <permission
+        android:name="io.bambosan.mbloader.LAUNCH_MINECRAFT"
+        android:protectionLevel="normal"
+        android:description="@string/permission_launch_minecraft" />
 
 </manifest>

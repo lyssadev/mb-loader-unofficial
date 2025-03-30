@@ -6,4 +6,5 @@
 	<string name="draco_desc">Startup with support for shader resourcepacks from global resourcepacks tab only (more compatible)</string>
 	<string name="welcome">Please choose what to launch mc with</string>
 	<string name="mc_pkgname">mc packageid:</string>
+	<string name="permission_launch_minecraft">Permission to launch Minecraft with MB Loader</string>
 </resources>
