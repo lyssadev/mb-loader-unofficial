@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        Toast.makeText(this, "Modded By xzyyy", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Modded By The NoxPE Team", Toast.LENGTH_SHORT).show();
 
         TextView listener = findViewById(R.id.listener);
         Button  mbl2_button = findViewById(R.id.mbl2_load);

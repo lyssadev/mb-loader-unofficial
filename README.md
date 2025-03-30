@@ -1,3 +1,3 @@
-# MB Loader Modded
+# MB Loader (Unofficial)
 
-**Not distributed by us**, modified by Xzyyy.
+**Not distributed by us**, modified by The NoxPE Team.
