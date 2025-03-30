@@ -26,12 +26,13 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"		
 		android:orientation="vertical"
-		android:padding="8dp"
-		android:background="#FF000000">
+		android:padding="16dp"
+		android:layout_marginBottom="16dp"
+		android:background="@drawable/rounded_background">
 
 		<TextView
 			android:id="@+id/textview1"
-			android:layout_width="wrap_content"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="@string/mbl2_desc"
 			android:textColor="#E0E0E0"
@@ -43,8 +44,9 @@
 			android:layout_width="200dp"
 			android:layout_height="wrap_content"
 			android:text="Load with mbl2"
-			android:backgroundTint="#9C27B0"
-			android:layout_marginBottom="32dp"/>
+			android:layout_gravity="center"
+			android:backgroundTint="#2196F3"
+			android:layout_marginBottom="8dp"/>
 
 	</LinearLayout>
 
@@ -53,12 +55,12 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"		
-		android:padding="8dp"
-		android:background="#FF000000">
+		android:padding="16dp"
+		android:background="@drawable/rounded_background">
 
 		<TextView
 			android:id="@+id/textview2"
-			android:layout_width="wrap_content"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="@string/draco_desc"
 			android:textColor="#E0E0E0"
@@ -70,8 +72,9 @@
 			android:layout_width="200dp"
 			android:layout_height="wrap_content"
 			android:text="Load with draco"
-			android:backgroundTint="#9C27B0"
-			android:layout_marginBottom="32dp"/>
+			android:layout_gravity="center"
+			android:backgroundTint="#2196F3"
+			android:layout_marginBottom="8dp"/>
 
 	</LinearLayout>
 
@@ -80,12 +83,14 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal"
-		android:padding="8dp">
+		android:padding="16dp"
+		android:layout_marginTop="16dp">
 
 		<TextView
 			android:id="@+id/textview3"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:textColor="#E0E0E0"
 			android:text="@string/mc_pkgname" />
 
 		<EditText
@@ -93,6 +98,8 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:hint="Package name of Minecraft"
+			android:textColorHint="#808080"
+			android:textColor="#FFFFFF"
 			android:inputType="text" />
 
 	</LinearLayout>
@@ -108,6 +115,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="Launcher logs here:"
+			android:textColor="#E0E0E0"
 			android:gravity="center_horizontal"
 			android:textSize="19sp" />
 
