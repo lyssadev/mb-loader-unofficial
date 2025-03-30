@@ -7,15 +7,19 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:orientation="vertical"
-	android:padding="8dp">
+	android:padding="16dp"
+	android:gravity="center"
+	android:background="#1C1C1C">
 
 	<TextView
 		android:id="@+id/textview"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:text="@string/welcome"
-		android:textSize="19sp"
-		android:gravity="center_horizontal" />
+		android:textSize="20sp"
+		android:textColor="#FFFFFF"
+		android:gravity="center"
+		android:layout_marginBottom="32dp"/>
 
 	<LinearLayout
 		android:id="@+id/tablelayout"
@@ -29,13 +33,18 @@
 			android:id="@+id/textview1"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/mbl2_desc" />
+			android:text="@string/mbl2_desc"
+			android:textColor="#E0E0E0"
+			android:gravity="center"
+			android:layout_marginBottom="16dp"/>
 
 		<Button
 			android:id="@+id/mbl2_load"
-			android:layout_width="wrap_content"
+			android:layout_width="200dp"
 			android:layout_height="wrap_content"
-			android:text="Load with mbl2" />
+			android:text="Load with mbl2"
+			android:backgroundTint="#9C27B0"
+			android:layout_marginBottom="32dp"/>
 
 	</LinearLayout>
 
@@ -51,13 +60,18 @@
 			android:id="@+id/textview2"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/draco_desc" />
+			android:text="@string/draco_desc"
+			android:textColor="#E0E0E0"
+			android:gravity="center"
+			android:layout_marginBottom="16dp"/>
 
 		<Button
 			android:id="@+id/draco_load"
-			android:layout_width="wrap_content"
+			android:layout_width="200dp"
 			android:layout_height="wrap_content"
-			android:text="Load with draco" />
+			android:text="Load with draco"
+			android:backgroundTint="#9C27B0"
+			android:layout_marginBottom="32dp"/>
 
 	</LinearLayout>
 
@@ -99,9 +113,11 @@
 
 		<TextView
 			android:id="@+id/listener"
-			android:layout_width="wrap_content"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="   " />
+			android:textColor="#CCCCCC"
+			android:gravity="center"
+			android:layout_marginTop="16dp"/>
 
 	</TableLayout>
 
