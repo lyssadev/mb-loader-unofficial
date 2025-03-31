@@ -33,10 +33,12 @@ import java.util.zip.ZipInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import android.widget.Toast;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.fragment.app.Fragment;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String MC_PACKAGE_NAME = "com.mojang.minecraftpe";
+    public static final String MC_PACKAGE_NAME = "com.mojang.minecraftpe";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,29 +47,39 @@ public class MainActivity extends AppCompatActivity {
         
         Toast.makeText(this, "Modded By The NoxPE Team", Toast.LENGTH_SHORT).show();
 
-        TextView listener = findViewById(R.id.listener);
-        Button  mbl2_button = findViewById(R.id.mbl2_load);
-        Button draco_button = findViewById(R.id.draco_load);
-        Handler handler = new Handler(Looper.getMainLooper());
-        mbl2_button.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            { 
-                startLauncher(handler, listener, "launcher_mbl2.dex", MC_PACKAGE_NAME);    
+        // Setup bottom navigation
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setOnItemSelectedListener(item -> {
+            Fragment selectedFragment = null;
+            
+            if (item.getItemId() == R.id.navigation_home) {
+                selectedFragment = new HomeFragment();
+            } else if (item.getItemId() == R.id.navigation_settings) {
+                selectedFragment = new SettingsFragment();
             }
+
+            if (selectedFragment != null) {
+                getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                        R.anim.fade_in,
+                        R.anim.fade_out
+                    )
+                    .replace(R.id.fragment_container, selectedFragment)
+                    .commit();
+                return true;
+            }
+            return false;
         });
-        
-        draco_button.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {        
-                startLauncher(handler, listener, "launcher_draco.dex", MC_PACKAGE_NAME);    
-            }
-        });    
+
+        // Set default fragment
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new HomeFragment())
+                .commit();
+        }
     }
-    private void startLauncher(Handler handler, TextView listener, String launcherDexName, String mcPackageName) {    
+
+    public void startLauncher(Handler handler, TextView listener, String launcherDexName, String mcPackageName) {    
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 File cacheDexDir = new File(getCodeCacheDir(), "dex");
