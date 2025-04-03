@@ -22,7 +22,6 @@
 		app:itemIconTint="@color/nav_item_color"
 		app:itemTextColor="@color/nav_item_color"
 		app:itemRippleColor="#33808080"
-		app:itemActiveIndicatorStyle="@style/App.Custom.Indicator"
 		app:labelVisibilityMode="labeled"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:menu="@menu/bottom_nav_menu"/>
