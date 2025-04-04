@@ -3,6 +3,7 @@ package io.bambosan.mbloader;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.IBinder;
@@ -30,6 +31,13 @@ public class FPSOverlayService extends Service implements Choreographer.FrameCal
     private static final int MAX_SAMPLE_SIZE = 60; // Store last 60 frames for average
     private long lastFrameTimeNanos;
     private float currentFps;
+    
+    // FPS thresholds and colors
+    private static final float HIGH_FPS_THRESHOLD = 60.0f;
+    private static final float LOW_FPS_THRESHOLD = 30.0f;
+    private static final int COLOR_GOOD = Color.rgb(0, 255, 0);      // Green
+    private static final int COLOR_MODERATE = Color.rgb(255, 255, 0); // Yellow
+    private static final int COLOR_POOR = Color.rgb(255, 0, 0);      // Red
     
     @Override
     public void onCreate() {
@@ -108,6 +116,16 @@ public class FPSOverlayService extends Service implements Choreographer.FrameCal
         Choreographer.getInstance().postFrameCallback(this);
     }
 
+    private int getFpsColor(float fps) {
+        if (fps >= HIGH_FPS_THRESHOLD) {
+            return COLOR_GOOD;
+        } else if (fps >= LOW_FPS_THRESHOLD) {
+            return COLOR_MODERATE;
+        } else {
+            return COLOR_POOR;
+        }
+    }
+
     @Override
     public void doFrame(long frameTimeNanos) {
         // Calculate frame time
@@ -134,7 +152,14 @@ public class FPSOverlayService extends Service implements Choreographer.FrameCal
             // Update UI on main thread
             handler.post(() -> {
                 if (fpsText != null) {
+                    // Update both text and color
                     fpsText.setText(String.format("%.1f FPS", currentFps));
+                    fpsText.setTextColor(getFpsColor(currentFps));
+                    
+                    // Add performance indicator emoji
+                    String performanceEmoji = currentFps >= HIGH_FPS_THRESHOLD ? "🟢" :
+                                            currentFps >= LOW_FPS_THRESHOLD ? "🟡" : "🔴";
+                    fpsText.setText(String.format("%s %.1f FPS", performanceEmoji, currentFps));
                 }
             });
         }
