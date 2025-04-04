@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.fragment.app.Fragment;
+import android.content.Context;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -240,6 +241,14 @@ String logMessage = e.getCause() != null ? e.getCause().toString() : e.toString(
             Collections.addAll(listSrcSplit, mcInfo.splitSourceDirs);
             mcActivity.putExtra("MC_SPLIT_SRC", listSrcSplit);
         }
+
+        if (getSharedPreferences("app_settings", Context.MODE_PRIVATE).getBoolean("fps_overlay_enabled", false)) {
+            // Stop any existing service first
+            stopService(new Intent(this, FPSOverlayService.class));
+            // Start a fresh instance
+            startService(new Intent(this, FPSOverlayService.class));
+        }
+
         startActivity(mcActivity);
         finish();
     }
