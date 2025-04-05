@@ -14,6 +14,7 @@ import android.widget.Toast;
 import android.content.Intent;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import android.widget.TextView;
 
 public class SettingsFragment extends Fragment {
     private SharedPreferences prefs;
