@@ -38,6 +38,7 @@ import androidx.fragment.app.Fragment;
 import android.content.Context;
 import android.widget.ScrollView;
 import android.view.Gravity;
+import dalvik.system.DexFile;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -185,37 +186,89 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SoonBlockedPrivateApi")
     private void processNativeLibraries(ApplicationInfo mcInfo, @NotNull Object pathList, @NotNull Handler handler, TextView listener, ScrollView logScrollView) throws Exception {
-        Method makePathElements = null;
-        try {
-             makePathElements = pathList.getClass().getDeclaredMethod("makePathElements", java.util.List.class);
-        } catch(NoSuchMethodException e) {
-            makePathElements = pathList.getClass().getDeclaredMethod("makePathElements", java.util.List.class, java.io.File.class, java.util.List.class);
+        FileInputStream inStream = new FileInputStream(getApkWithLibs(mcInfo));
+ 		BufferedInputStream bufInStream = new BufferedInputStream(inStream);
+ 		ZipInputStream inZipStream = new ZipInputStream(bufInStream);
+ 		if (!checkLibCompatibility(inZipStream)) {
+ 		    throw new Exception("Installled minecraft does not support main arch of device: " + Build.SUPPORTED_ABIS[0]);
+ 		} 		    
+        Method addNativePath = pathList.getClass().getDeclaredMethod("addNativePath", Collection.class);
+        ArrayList<String> libDirList = new ArrayList<>();
+        File libdir = new File(mcInfo.nativeLibraryDir);
+		if (libdir.list() == null || libdir.list().length == 0 
+		 || (mcInfo.flags & ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) != ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) {
+			loadUnextractedLibs(mcInfo);
+			libDirList.add(getCodeCacheDir().getAbsolutePath() + "/");
+		} else {
+            libDirList.add(mcInfo.nativeLibraryDir);
         }
+        addNativePath.invoke(pathList, libDirList);
+        handler.post(() -> {
+            listener.append("\n-> " + mcInfo.nativeLibraryDir + " added to native library directory path");
+            logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
+        });
+    }
+    
+    private static Boolean checkLibCompatibility(ZipInputStream zip) throws Exception{
+         ZipEntry ze = null;
+         String requiredLibDir = "lib/" + Build.SUPPORTED_ABIS[0] + "/";
+         while ((ze = zip.getNextEntry()) != null) {
+             if (ze.getName().startsWith(requiredLibDir)) {
+                 return true;
+             }
+         }
+         zip.close();
+         return false;
+     }
+     
+    private void loadUnextractedLibs(ApplicationInfo appInfo) throws Exception {
+		FileInputStream inStream = new FileInputStream(getApkWithLibs(appInfo));
+		BufferedInputStream bufInStream = new BufferedInputStream(inStream);
+		ZipInputStream inZipStream = new ZipInputStream(bufInStream);
+		String zipPath = "lib/" + Build.SUPPORTED_ABIS[0] + "/";
+		String outPath = getCodeCacheDir().getAbsolutePath() + "/";
+		File dir = new File(outPath);
+		dir.mkdir();
+		extractDir(appInfo, inZipStream, zipPath, outPath);
+	}
+	
+	public String getApkWithLibs(ApplicationInfo pkg) throws PackageManager.NameNotFoundException {
+		// get installed split's Names
+		String[] sn=pkg.splitSourceDirs;
 
-        Collection<String> libDirs = new ArrayList<>();
-        Collections.addAll(libDirs, mcInfo.nativeLibraryDir);
-        if (mcInfo.splitSourceDirs != null) {
-            ZipFile zipFile;
-            ZipEntry entry;
-            for (String srcDir : mcInfo.splitSourceDirs) {
-                if (srcDir.endsWith(".apk") && (zipFile = new ZipFile(srcDir)) != null && (entry = zipFile.getEntry("lib/")) != null && entry.isDirectory()) {
-                    libDirs.add(srcDir + "!/lib");
+		// check whether if it's really split or not
+		if (sn != null && sn.length > 0) {
+			String cur_abi = Build.SUPPORTED_ABIS[0].replace('-','_');
+			// search installed splits
+			for(String n:sn){
+				//check whether is the one required
+				if(n.contains(cur_abi)){
+				// yes, it's installed!
+					return n;
+				}
+			}
+		}
+		// couldn't find!
+		return pkg.sourceDir;
+	}
+	
+	private static void extractDir(ApplicationInfo mcInfo, ZipInputStream zip, String zip_folder, String out_folder) throws Exception {
+        ZipEntry ze = null;
+        while ((ze = zip.getNextEntry()) != null) {
+            if (ze.getName().startsWith(zip_folder) && !ze.getName().contains("c++_shared")) {
+				String strippedName = ze.getName().substring(zip_folder.length());
+				String path = out_folder + "/" + strippedName;
+				OutputStream out = new FileOutputStream(path);
+				BufferedOutputStream outBuf = new BufferedOutputStream(out);
+                byte[] buffer = new byte[9000];
+                int len;
+                while ((len = zip.read(buffer)) != -1) {
+                    outBuf.write(buffer, 0, len);
                 }
+                outBuf.close();
             }
         }
-
-        Field nativeLibraryPathElements = pathList.getClass().getDeclaredField("nativeLibraryPathElements");
-        nativeLibraryPathElements.setAccessible(true);
-
-        // Commenting out the following lines to prevent IllegalAccessException on newer Android versions.
-        // This will likely break native library loading functionality.
-        // Object[] elements = (Object[]) makePathElements.invoke(null, libDirs);
-        // nativeLibraryPathElements.set(pathList, elements);
-
-        handler.post(() -> {
-             listener.append("\n-> Processed native libraries.");
-             logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
-        });
+        zip.close();
     }
 
     private void launchMinecraft(@NotNull ApplicationInfo mcInfo) throws ClassNotFoundException {
