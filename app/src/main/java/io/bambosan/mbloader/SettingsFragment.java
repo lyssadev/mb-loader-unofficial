@@ -13,6 +13,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 import android.content.Intent;
 import androidx.fragment.app.Fragment;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class SettingsFragment extends Fragment {
     private SharedPreferences prefs;
@@ -27,7 +28,7 @@ public class SettingsFragment extends Fragment {
         EditText mcPackageName = rootView.findViewById(R.id.mc_pkgname);
         mcPackageName.setText(MainActivity.MC_PACKAGE_NAME);
 
-        Switch fpsOverlaySwitch = rootView.findViewById(R.id.fps_overlay_switch);
+        SwitchMaterial fpsOverlaySwitch = rootView.findViewById(R.id.fps_overlay_switch);
         fpsOverlaySwitch.setChecked(prefs.getBoolean("fps_overlay_enabled", false));
         
         fpsOverlaySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -56,7 +57,7 @@ public class SettingsFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
             if (Settings.canDrawOverlays(requireContext())) {
-                Switch fpsOverlaySwitch = rootView.findViewById(R.id.fps_overlay_switch);
+                SwitchMaterial fpsOverlaySwitch = rootView.findViewById(R.id.fps_overlay_switch);
                 fpsOverlaySwitch.setChecked(true);
                 prefs.edit().putBoolean("fps_overlay_enabled", true).apply();
                 requireContext().startService(new Intent(requireContext(), FPSOverlayService.class));

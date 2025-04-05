@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -36,13 +37,12 @@
             android:gravity="center"
             android:layout_marginBottom="16dp"/>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/mbl2_load"
             android:layout_width="220dp"
             android:layout_height="wrap_content"
             android:text="Load with mbl2"
             android:layout_gravity="center"
-            android:backgroundTint="#2196F3"
             android:layout_marginBottom="28dp"/>
 
         <View
@@ -60,13 +60,12 @@
             android:gravity="center"
             android:layout_marginBottom="16dp"/>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/draco_load"
             android:layout_width="220dp"
             android:layout_height="wrap_content"
             android:text="Load with draco"
-            android:layout_gravity="center"
-            android:backgroundTint="#2196F3"/>
+            android:layout_gravity="center"/>
 
     </LinearLayout>
 

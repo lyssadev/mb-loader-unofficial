@@ -26,4 +26,18 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:menu="@menu/bottom_nav_menu"/>
 
+    <!-- Custom Divider -->
+    <View
+        android:id="@+id/nav_divider"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="#444444" 
+        app:layout_constraintTop_toTopOf="@+id/bottom_navigation"
+        app:layout_constraintBottom_toBottomOf="@+id/bottom_navigation"
+        app:layout_constraintStart_toStartOf="@+id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="@+id/bottom_navigation"
+        app:layout_constraintHorizontal_bias="0.5"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

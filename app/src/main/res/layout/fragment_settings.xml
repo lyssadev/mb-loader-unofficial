@@ -62,10 +62,32 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"/>
 
-    <Switch
-        android:id="@+id/fps_overlay_switch"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Show FPS Overlay"
-        android:layout_marginBottom="8dp"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/fps_overlay_switch"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Show FPS Overlay" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BETA"
+            android:background="@drawable/beta_label_background"
+            android:textColor="#795548"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
 </LinearLayout> 
