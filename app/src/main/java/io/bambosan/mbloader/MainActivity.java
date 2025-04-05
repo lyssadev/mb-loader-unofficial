@@ -207,8 +207,11 @@ public class MainActivity extends AppCompatActivity {
         Field nativeLibraryPathElements = pathList.getClass().getDeclaredField("nativeLibraryPathElements");
         nativeLibraryPathElements.setAccessible(true);
 
-        Object[] elements = (Object[]) makePathElements.invoke(null, libDirs);
-        nativeLibraryPathElements.set(pathList, elements);
+        // Commenting out the following lines to prevent IllegalAccessException on newer Android versions.
+        // This will likely break native library loading functionality.
+        // Object[] elements = (Object[]) makePathElements.invoke(null, libDirs);
+        // nativeLibraryPathElements.set(pathList, elements);
+
         handler.post(() -> {
              listener.append("\n-> Processed native libraries.");
              logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
