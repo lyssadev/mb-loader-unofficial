@@ -36,6 +36,7 @@ import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.fragment.app.Fragment;
 import android.content.Context;
+import android.widget.ScrollView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -82,35 +83,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void startLauncher(Handler handler, TextView listener, String launcherDexName, String mcPackageName) {    
+    public void startLauncher(Handler handler, TextView listener, ScrollView logScrollView, String launcherDexName, String mcPackageName) {    
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 File cacheDexDir = new File(getCodeCacheDir(), "dex");
-                handleCacheCleaning(cacheDexDir, handler, listener);
+                handleCacheCleaning(cacheDexDir, handler, listener, logScrollView);
                 ApplicationInfo mcInfo = getPackageManager().getApplicationInfo(mcPackageName, PackageManager.GET_META_DATA);
                 Object pathList = getPathList(getClassLoader());
-                processDexFiles(mcInfo, cacheDexDir, pathList, handler, listener, launcherDexName);
-                processNativeLibraries(mcInfo, pathList, handler, listener);
+                processDexFiles(mcInfo, cacheDexDir, pathList, handler, listener, logScrollView, launcherDexName);
+                processNativeLibraries(mcInfo, pathList, handler, listener, logScrollView);
                 launchMinecraft(mcInfo);
             } catch (Exception e) {
-                //Intent fallbackActivity = new Intent(this, Fallback.class);
-                //handleException(e, fallbackActivity);
-String logMessage = e.getCause() != null ? e.getCause().toString() : e.toString();                
-            handler.post(() -> listener.setText("Launching failed: " + logMessage));                
+                String logMessage = e.getCause() != null ? e.getCause().toString() : e.toString();
+                handler.post(() -> {
+                    listener.setText("Launching failed: " + logMessage);
+                    logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
+                });
             }
         });    
     }
     @SuppressLint("SetTextI18n")
-    private void handleCacheCleaning(@NotNull File cacheDexDir, Handler handler, TextView listener) {
+    private void handleCacheCleaning(@NotNull File cacheDexDir, Handler handler, TextView listener, ScrollView logScrollView) {
         if (cacheDexDir.exists() && cacheDexDir.isDirectory()) {
-            handler.post(() -> listener.setText("-> " + cacheDexDir.getAbsolutePath() + " not empty, do cleaning"));
+            handler.post(() -> {
+                listener.setText("-> " + cacheDexDir.getAbsolutePath() + " not empty, do cleaning");
+                logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
+            });
             for (File file : Objects.requireNonNull(cacheDexDir.listFiles())) {
                 if (file.delete()) {
-                    handler.post(() -> listener.append("\n-> " + file.getName() + " deleted"));
+                    handler.post(() -> {
+                        listener.append("\n-> " + file.getName() + " deleted");
+                        logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
+                    });
                 }
             }
         } else {
-            handler.post(() -> listener.setText("-> " + cacheDexDir.getAbsolutePath() + " is empty, skip cleaning"));
+            handler.post(() -> {
+                listener.setText("-> " + cacheDexDir.getAbsolutePath() + " is empty, skip cleaning");
+                logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
+            });
         }
     }
 
@@ -120,16 +131,22 @@ String logMessage = e.getCause() != null ? e.getCause().toString() : e.toString(
         return pathListField.get(classLoader);
     }
 
-    private void processDexFiles(ApplicationInfo mcInfo, File cacheDexDir, @NotNull Object pathList, @NotNull Handler handler, TextView listener, String launcherDexName) throws Exception {
+    private void processDexFiles(ApplicationInfo mcInfo, File cacheDexDir, @NotNull Object pathList, @NotNull Handler handler, TextView listener, ScrollView logScrollView, String launcherDexName) throws Exception {
         Method addDexPath = pathList.getClass().getDeclaredMethod("addDexPath", String.class, File.class);
         File launcherDex = new File(cacheDexDir, launcherDexName);
 
         copyFile(getAssets().open(launcherDexName), launcherDex);
-        handler.post(() -> listener.append("\n-> " + launcherDexName + " copied to " + launcherDex.getAbsolutePath()));
+        handler.post(() -> {
+             listener.append("\n-> " + launcherDexName + " copied to " + launcherDex.getAbsolutePath());
+             logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
+        });
 
         if (launcherDex.setReadOnly()) {
             addDexPath.invoke(pathList, launcherDex.getAbsolutePath(), null);
-            handler.post(() -> listener.append("\n-> " + launcherDexName + " added to dex path list"));
+            handler.post(() -> {
+                listener.append("\n-> " + launcherDexName + " added to dex path list");
+                logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
+            });
         }
 
         try (ZipFile zipFile = new ZipFile(mcInfo.sourceDir)) {
@@ -139,97 +156,58 @@ String logMessage = e.getCause() != null ? e.getCause().toString() : e.toString(
                 if (dexFile != null) {
                     File mcDex = new File(cacheDexDir, dexName);
                     copyFile(zipFile.getInputStream(dexFile), mcDex);
-                    handler.post(() -> listener.append("\n-> " + mcInfo.sourceDir + "/" + dexName + " copied to " + mcDex.getAbsolutePath()));
+                     handler.post(() -> {
+                         listener.append("\n-> " + mcInfo.sourceDir + "/" + dexName + " copied to " + mcDex.getAbsolutePath());
+                         logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
+                     });
                     if (mcDex.setReadOnly()) {
                         addDexPath.invoke(pathList, mcDex.getAbsolutePath(), null);
-                        handler.post(() -> listener.append("\n-> " + dexName + " added to dex path list"));
+                        handler.post(() -> {
+                             listener.append("\n-> " + dexName + " added to dex path list");
+                             logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
+                        });
                     }
                 }
             }
         } catch (Throwable th) {}
+         handler.post(() -> {
+             listener.append("\n-> Processed dex files.");
+             logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
+         });
     }
 
-    private void processNativeLibraries(@NotNull ApplicationInfo mcInfo, @NotNull Object pathList, @NotNull Handler handler, TextView listener) throws Exception {
-        FileInputStream inStream = new FileInputStream(getApkWithLibs(mcInfo));
- 		    BufferedInputStream bufInStream = new BufferedInputStream(inStream);
- 		    ZipInputStream inZipStream = new ZipInputStream(bufInStream);
- 		    if (!checkLibCompatibility(inZipStream)) {
- 		        throw new Exception("Installled minecraft does not support main arch of device: " + Build.SUPPORTED_ABIS[0]);
- 		    } 		    
-        Method addNativePath = pathList.getClass().getDeclaredMethod("addNativePath", Collection.class);
-        ArrayList<String> libDirList = new ArrayList<>();
-        File libdir = new File(mcInfo.nativeLibraryDir);
-			  if (libdir.list() == null || libdir.list().length == 0 
-			   || (mcInfo.flags & ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) != ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) {
-				    loadUnextractedLibs(mcInfo);
-				    libDirList.add(getCodeCacheDir().getAbsolutePath() + "/");
-			  } else {
-         libDirList.add(mcInfo.nativeLibraryDir);
-         }
-        addNativePath.invoke(pathList, libDirList);
-        handler.post(() -> listener.append("\n-> " + mcInfo.nativeLibraryDir + " added to native library directory path"));
-    }
-    private static Boolean checkLibCompatibility(ZipInputStream zip) throws Exception{
-         ZipEntry ze = null;
-         String requiredLibDir = "lib/" + Build.SUPPORTED_ABIS[0] + "/";
-         while ((ze = zip.getNextEntry()) != null) {
-             if (ze.getName().startsWith(requiredLibDir)) {
-                 return true;
-             }
-         }
-         zip.close();
-         return false;
-     }
-    private void loadUnextractedLibs(ApplicationInfo appInfo) throws Exception {
-		    FileInputStream inStream = new FileInputStream(getApkWithLibs(appInfo));
-		    BufferedInputStream bufInStream = new BufferedInputStream(inStream);
-		    ZipInputStream inZipStream = new ZipInputStream(bufInStream);
-		    String zipPath = "lib/" + Build.SUPPORTED_ABIS[0] + "/";
-		    String outPath = getCodeCacheDir().getAbsolutePath() + "/";
-		    File dir = new File(outPath);
-		    dir.mkdir();
-		    extractDir(appInfo, inZipStream, zipPath, outPath);
-	  }
-	  public String getApkWithLibs(ApplicationInfo pkg) throws PackageManager.NameNotFoundException
-	{
-		// get installed split's Names
-		String[] sn=pkg.splitSourceDirs;
+    @SuppressLint("SoonBlockedPrivateApi")
+    private void processNativeLibraries(ApplicationInfo mcInfo, @NotNull Object pathList, @NotNull Handler handler, TextView listener, ScrollView logScrollView) throws Exception {
+        Method makePathElements = null;
+        try {
+             makePathElements = pathList.getClass().getDeclaredMethod("makePathElements", java.util.List.class);
+        } catch(NoSuchMethodException e) {
+            makePathElements = pathList.getClass().getDeclaredMethod("makePathElements", java.util.List.class, java.io.File.class, java.util.List.class);
+        }
 
-		// check whether if it's really split or not
-		if (sn != null && sn.length > 0)
-		{
-			String cur_abi = Build.SUPPORTED_ABIS[0].replace('-','_');
-			// search installed splits
-			for(String n:sn){
-				
-				 //check whether is the one required
-				if(n.contains(cur_abi)){
-				// yes, it's installed!
-					return n;
-				}
-			}
-		}
-		// couldn't find!
-		return pkg.sourceDir;
-	}
-	private static void extractDir(ApplicationInfo mcInfo, ZipInputStream zip, String zip_folder, String out_folder ) throws Exception{
-        ZipEntry ze = null;
-        while ((ze = zip.getNextEntry()) != null) {
-            if (ze.getName().startsWith(zip_folder) && !ze.getName().contains("c++_shared")) {
-				String strippedName = ze.getName().substring(zip_folder.length());
-				String path = out_folder + "/" + strippedName;
-				OutputStream out = new FileOutputStream(path);
-				BufferedOutputStream outBuf = new BufferedOutputStream(out);
-                byte[] buffer = new byte[9000];
-                int len;
-                while ((len = zip.read(buffer)) != -1) {
-                    outBuf.write(buffer, 0, len);
+        Collection<String> libDirs = new ArrayList<>();
+        Collections.addAll(libDirs, mcInfo.nativeLibraryDir);
+        if (mcInfo.splitSourceDirs != null) {
+            ZipFile zipFile;
+            ZipEntry entry;
+            for (String srcDir : mcInfo.splitSourceDirs) {
+                if (srcDir.endsWith(".apk") && (zipFile = new ZipFile(srcDir)) != null && (entry = zipFile.getEntry("lib/")) != null && entry.isDirectory()) {
+                    libDirs.add(srcDir + "!/lib");
                 }
-                outBuf.close();
             }
         }
-        zip.close();
+
+        Field nativeLibraryPathElements = pathList.getClass().getDeclaredField("nativeLibraryPathElements");
+        nativeLibraryPathElements.setAccessible(true);
+
+        Object[] elements = (Object[]) makePathElements.invoke(null, libDirs);
+        nativeLibraryPathElements.set(pathList, elements);
+        handler.post(() -> {
+             listener.append("\n-> Processed native libraries.");
+             logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
+        });
     }
+
     private void launchMinecraft(@NotNull ApplicationInfo mcInfo) throws ClassNotFoundException {
         Class<?> launcherClass = getClassLoader().loadClass("com.mojang.minecraftpe.Launcher");
         // We do this to preserve data that apps like file managers pass 

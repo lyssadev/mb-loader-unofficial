@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="800">
+    android:duration="600"
+    android:shareInterpolator="false">
     
     <alpha
         android:fromAlpha="0"
@@ -8,7 +9,7 @@
         android:interpolator="@android:anim/decelerate_interpolator"/>
     
     <translate
-        android:fromYDelta="10%"
+        android:fromYDelta="15%p"
         android:toYDelta="0"
-        android:interpolator="@android:anim/decelerate_interpolator"/>
+        android:interpolator="@android:anim/overshoot_interpolator"/>
 </set> 

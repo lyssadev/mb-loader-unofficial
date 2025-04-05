@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 
@@ -18,14 +19,15 @@ public class HomeFragment extends Fragment {
         TextView listener = view.findViewById(R.id.listener);
         Button mbl2_button = view.findViewById(R.id.mbl2_load);
         Button draco_button = view.findViewById(R.id.draco_load);
+        ScrollView logScrollView = view.findViewById(R.id.log_scroll_view);
         Handler handler = new Handler(Looper.getMainLooper());
 
         mbl2_button.setOnClickListener(v -> {
-            ((MainActivity) requireActivity()).startLauncher(handler, listener, "launcher_mbl2.dex", MainActivity.MC_PACKAGE_NAME);
+            ((MainActivity) requireActivity()).startLauncher(handler, listener, logScrollView, "launcher_mbl2.dex", MainActivity.MC_PACKAGE_NAME);
         });
         
         draco_button.setOnClickListener(v -> {
-            ((MainActivity) requireActivity()).startLauncher(handler, listener, "launcher_draco.dex", MainActivity.MC_PACKAGE_NAME);
+            ((MainActivity) requireActivity()).startLauncher(handler, listener, logScrollView, "launcher_draco.dex", MainActivity.MC_PACKAGE_NAME);
         });
 
         return view;
