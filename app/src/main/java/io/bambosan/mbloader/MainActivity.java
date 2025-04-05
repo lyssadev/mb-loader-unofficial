@@ -37,6 +37,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.fragment.app.Fragment;
 import android.content.Context;
 import android.widget.ScrollView;
+import android.view.Gravity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,6 +51,12 @@ public class MainActivity extends AppCompatActivity {
         // Add entry animation
         View rootView = findViewById(android.R.id.content);
         rootView.startAnimation(android.view.animation.AnimationUtils.loadAnimation(this, R.anim.slide_up_fade_in));
+        
+        // --- Show Animated Toast ---
+        Toast toast = Toast.makeText(this, "BETA 1 (v1.5) - BUILD01", Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0); // Center the toast
+        toast.show();
+        // ---------------------------
         
         // Setup bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);

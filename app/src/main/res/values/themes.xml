@@ -8,6 +8,7 @@
         <item name="android:windowTranslucentStatus">false</item>
         <item name="android:enforceNavigationBarContrast">false</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:toastStyle">@style/AnimatedToast</item>
     </style>
 
     <style name="App.Custom.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
@@ -15,5 +16,14 @@
         <item name="android:alpha">0.12</item>
         <item name="android:width">48dp</item>
         <item name="android:height">32dp</item>
+    </style>
+
+    <style name="AnimatedToast" parent="android:Widget.Material.Light.Toast">
+        <item name="android:windowAnimationStyle">@style/ToastAnimation</item>
+    </style>
+
+    <style name="ToastAnimation">
+        <item name="android:windowEnterAnimation">@anim/fade_in</item>
+        <item name="android:windowExitAnimation">@anim/fade_out</item>
     </style>
 </resources> 
