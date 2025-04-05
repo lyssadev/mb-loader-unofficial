@@ -39,6 +39,9 @@ import android.content.Context;
 import android.widget.ScrollView;
 import android.view.Gravity;
 import dalvik.system.DexFile;
+import android.net.Uri;
+import android.app.ActivityManager;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -49,9 +52,29 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
+        // Support for shared element transition from splash screen
+        postponeEnterTransition();
+        
         // Add entry animation
         View rootView = findViewById(android.R.id.content);
         rootView.startAnimation(android.view.animation.AnimationUtils.loadAnimation(this, R.anim.slide_up_fade_in));
+        
+        // Complete the postponed shared element transition
+        startPostponedEnterTransition();
+        
+        // Check if we were launched with a file intent (from file manager)
+        if (getIntent() != null && Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+            // User opened a .mcpack file from a file manager
+            Uri fileUri = getIntent().getData();
+            if (fileUri != null) {
+                // Handle the file import process
+                importFileDirectly(fileUri);
+            } else {
+                Toast.makeText(this, "Error: Invalid file", Toast.LENGTH_SHORT).show();
+                setupDefaultView();
+            }
+            return;
+        }
         
         // --- Show Animated Toast ---
         Toast toast = Toast.makeText(this, "BETA 1 (v1.5) - BUILD01", Toast.LENGTH_SHORT);
@@ -319,4 +342,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     
+    // Import file when app is launched via ACTION_VIEW intent
+    private void importFileDirectly(Uri fileUri) {
+        // Set up the home fragment to show logs
+        HomeFragment homeFragment = new HomeFragment();
+        
+        getSupportFragmentManager().beginTransaction()
+            .replace(R.id.fragment_container, homeFragment)
+            .commit();
+        
+        // Allow fragment to initialize
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (homeFragment.isAdded()) {
+                // We don't need to process the file at all - just start the loader
+                // and let Android's file handling system work
+                
+                // Default to MBL2 loader
+                String loaderDexName = "launcher_mbl2.dex";
+                
+                // Display info about what we're doing
+                Toast.makeText(this, "Starting Minecraft...", Toast.LENGTH_SHORT).show();
+                
+                // Launch Minecraft with the default loader
+                homeFragment.importMcpackFile(fileUri, loaderDexName);
+            } else {
+                Toast.makeText(this, "Error initializing app", Toast.LENGTH_SHORT).show();
+                setupDefaultView();
+            }
+        }, 300);
+    }
+    
+    private void setupDefaultView() {
+        // Set default fragment if something goes wrong
+        getSupportFragmentManager().beginTransaction()
+            .replace(R.id.fragment_container, new HomeFragment())
+            .commit();
+    }
 }

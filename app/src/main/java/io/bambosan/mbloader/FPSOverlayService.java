@@ -42,11 +42,24 @@ public class FPSOverlayService extends Service implements Choreographer.FrameCal
     @Override
     public void onCreate() {
         super.onCreate();
+        
+        // Check if we have the overlay permission before attempting to create the overlay
+        if (!android.provider.Settings.canDrawOverlays(this)) {
+            stopSelf();
+            return;
+        }
+        
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         handler = new Handler(Looper.getMainLooper());
         frameIntervals = new LinkedList<>();
-        createOverlay();
-        startFPSTracking();
+        
+        try {
+            createOverlay();
+            startFPSTracking();
+        } catch (Exception e) {
+            e.printStackTrace();
+            stopSelf();
+        }
     }
 
     private void createOverlay() {
