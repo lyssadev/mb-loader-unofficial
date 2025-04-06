@@ -2,6 +2,8 @@ package io.bambosan.mbloader;
 
 import org.jetbrains.annotations.NotNull;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -119,10 +121,18 @@ public class MainActivity extends AppCompatActivity {
             try {
                 File cacheDexDir = new File(getCodeCacheDir(), "dex");
                 handleCacheCleaning(cacheDexDir, handler, listener, logScrollView);
-                ApplicationInfo mcInfo = getPackageManager().getApplicationInfo(mcPackageName, PackageManager.GET_META_DATA);
+                ApplicationInfo mcInfo = null;
+                try {
+                    mcInfo = getPackageManager().getApplicationInfo(mcPackageName, PackageManager.GET_META_DATA);
+                } catch(Exception e) {
+                    handler.post(() -> alertAndExit("Minecraft not found", "Perhaps you don't have it installed?"));
+                    return;
+                }
                 Object pathList = getPathList(getClassLoader());
                 processDexFiles(mcInfo, cacheDexDir, pathList, handler, listener, logScrollView, launcherDexName);
-                processNativeLibraries(mcInfo, pathList, handler, listener, logScrollView);
+                if (!processNativeLibraries(mcInfo, pathList, handler, listener, logScrollView)) {
+                    return;
+                }
                 launchMinecraft(mcInfo);
             } catch (Exception e) {
                 String logMessage = e.getCause() != null ? e.getCause().toString() : e.toString();
@@ -208,12 +218,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SoonBlockedPrivateApi")
-    private void processNativeLibraries(ApplicationInfo mcInfo, @NotNull Object pathList, @NotNull Handler handler, TextView listener, ScrollView logScrollView) throws Exception {
+    private boolean processNativeLibraries(ApplicationInfo mcInfo, @NotNull Object pathList, @NotNull Handler handler, TextView listener, ScrollView logScrollView) throws Exception {
         FileInputStream inStream = new FileInputStream(getApkWithLibs(mcInfo));
  		BufferedInputStream bufInStream = new BufferedInputStream(inStream);
  		ZipInputStream inZipStream = new ZipInputStream(bufInStream);
  		if (!checkLibCompatibility(inZipStream)) {
- 		    throw new Exception("Installled minecraft does not support main arch of device: " + Build.SUPPORTED_ABIS[0]);
+ 		    handler.post(() -> alertAndExit("Wrong Minecraft architecture", "The Minecraft you have installed does not support the same main architecture (" + Build.SUPPORTED_ABIS[0] + ") your device uses, MBLoader can't work with it"));
+ 		    return false;
  		} 		    
         Method addNativePath = pathList.getClass().getDeclaredMethod("addNativePath", Collection.class);
         ArrayList<String> libDirList = new ArrayList<>();
@@ -230,6 +241,7 @@ public class MainActivity extends AppCompatActivity {
             listener.append("\n-> " + mcInfo.nativeLibraryDir + " added to native library directory path");
             logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
         });
+        return true;
     }
     
     private static Boolean checkLibCompatibility(ZipInputStream zip) throws Exception{
@@ -243,6 +255,20 @@ public class MainActivity extends AppCompatActivity {
          zip.close();
          return false;
      }
+     
+    private void alertAndExit(String issue, String description) {
+        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+        alertDialog.setTitle(issue);
+        alertDialog.setMessage(description);
+        alertDialog.setCancelable(false);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Exit",
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
+        alertDialog.show();
+    }
      
     private void loadUnextractedLibs(ApplicationInfo appInfo) throws Exception {
 		FileInputStream inStream = new FileInputStream(getApkWithLibs(appInfo));

@@ -35,6 +35,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@style/Theme.MBLoader"
+        android:appCategory="game"
         android:isGame="true">
         <activity
             android:name=".SplashActivity"
