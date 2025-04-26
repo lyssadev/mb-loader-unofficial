@@ -75,7 +75,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="MB Loader v1.5a1"
+                android:text="MB Loader v1.5"
                 android:textColor="#808080"
                 android:textSize="14sp"
                 android:gravity="center"

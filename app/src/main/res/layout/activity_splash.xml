@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="v1.5a1"
+        android:text="v1.5"
         android:textColor="#9E9E9E"
         android:textSize="16sp"
         android:alpha="0"
