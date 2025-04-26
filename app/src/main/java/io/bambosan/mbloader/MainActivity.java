@@ -1,49 +1,51 @@
 package io.bambosan.mbloader;
 
-import org.jetbrains.annotations.NotNull;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.os.Handler;
-import android.os.Looper;
-import android.view.View;
-import android.widget.TextView;
-import android.widget.Button;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import android.widget.Toast;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import androidx.fragment.app.Fragment;
-import android.content.Context;
-import android.widget.ScrollView;
-import android.view.Gravity;
-import dalvik.system.DexFile;
-import android.net.Uri;
-import android.app.ActivityManager;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         
         // Support for shared element transition from splash screen
         postponeEnterTransition();
@@ -64,52 +65,16 @@ public class MainActivity extends AppCompatActivity {
         // Complete the postponed shared element transition
         startPostponedEnterTransition();
         
-        // Check if we were launched with a file intent (from file manager)
-        if (getIntent() != null && Intent.ACTION_VIEW.equals(getIntent().getAction())) {
-            // User opened a .mcpack file from a file manager
-            Uri fileUri = getIntent().getData();
-            if (fileUri != null) {
-                // Handle the file import process
-                importFileDirectly(fileUri);
-            } else {
-                Toast.makeText(this, "Error: Invalid file", Toast.LENGTH_SHORT).show();
-                setupDefaultView();
-            }
-            return;
-        }
-        
-        // --- Show Animated Toast ---
-        Toast toast = Toast.makeText(this, "BETA 1 (v1.5) - BUILD01", Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0); // Center the toast
-        toast.show();
-        // ---------------------------
-        
-        // Setup bottom navigation
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-        bottomNav.setOnItemSelectedListener(item -> {
-            Fragment selectedFragment = null;
-            
-            if (item.getItemId() == R.id.navigation_home) {
-                selectedFragment = new HomeFragment();
-            } else if (item.getItemId() == R.id.navigation_settings) {
-                selectedFragment = new SettingsFragment();
-            }
-
-            if (selectedFragment != null) {
-                getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(
-                        R.anim.fade_in,
-                        R.anim.fade_out
-                    )
-                    .replace(R.id.fragment_container, selectedFragment)
-                    .commit();
-                return true;
-            }
-            return false;
-        });
-
-        // Set default fragment
         if (savedInstanceState == null) {
+            // --- Apply custom window flags ---
+            getWindow().setStatusBarColor(getColor(R.color.background));
+            getWindow().setNavigationBarColor(getColor(R.color.background));
+            
+            // --- Set content view and attach navigation ---
+            setContentView(R.layout.activity_main);
+            setupNavigation();
+            
+            // --- Set default fragment ---
             getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new HomeFragment())
                 .commit();
@@ -332,13 +297,6 @@ public class MainActivity extends AppCompatActivity {
             mcActivity.putExtra("MC_SPLIT_SRC", listSrcSplit);
         }
 
-        if (getSharedPreferences("app_settings", Context.MODE_PRIVATE).getBoolean("fps_overlay_enabled", false)) {
-            // Stop any existing service first
-            stopService(new Intent(this, FPSOverlayService.class));
-            // Start a fresh instance
-            startService(new Intent(this, FPSOverlayService.class));
-        }
-
         startActivity(mcActivity);
         finish();
     }
@@ -368,40 +326,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     
-    // Import file when app is launched via ACTION_VIEW intent
-    private void importFileDirectly(Uri fileUri) {
-        // Set up the home fragment to show logs
-        HomeFragment homeFragment = new HomeFragment();
-        
-        getSupportFragmentManager().beginTransaction()
-            .replace(R.id.fragment_container, homeFragment)
-            .commit();
-        
-        // Allow fragment to initialize
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (homeFragment.isAdded()) {
-                // We don't need to process the file at all - just start the loader
-                // and let Android's file handling system work
-                
-                // Default to MBL2 loader
-                String loaderDexName = "launcher_mbl2.dex";
-                
-                // Display info about what we're doing
-                Toast.makeText(this, "Starting Minecraft...", Toast.LENGTH_SHORT).show();
-                
-                // Launch Minecraft with the default loader
-                homeFragment.importMcpackFile(fileUri, loaderDexName);
-            } else {
-                Toast.makeText(this, "Error initializing app", Toast.LENGTH_SHORT).show();
-                setupDefaultView();
+    private void setupNavigation() {
+        // Setup bottom navigation
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setOnItemSelectedListener(item -> {
+            Fragment selectedFragment = null;
+            
+            if (item.getItemId() == R.id.navigation_home) {
+                selectedFragment = new HomeFragment();
+            } else if (item.getItemId() == R.id.navigation_settings) {
+                selectedFragment = new SettingsFragment();
             }
-        }, 300);
-    }
-    
-    private void setupDefaultView() {
-        // Set default fragment if something goes wrong
-        getSupportFragmentManager().beginTransaction()
-            .replace(R.id.fragment_container, new HomeFragment())
-            .commit();
+
+            if (selectedFragment != null) {
+                getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                        R.anim.fade_in,
+                        R.anim.fade_out
+                    )
+                    .replace(R.id.fragment_container, selectedFragment)
+                    .commit();
+                return true;
+            }
+            return false;
+        });
     }
 }

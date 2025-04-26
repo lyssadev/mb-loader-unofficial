@@ -18,11 +18,22 @@ android {
             abiFilters 'arm64-v8a', 'armeabi-v7a'
         }
     }
+    
+    signingConfigs {
+        release {
+            storeFile file("../my-release-key.jks")
+            storePassword "lyssadev"
+            keyAlias "my-alias"
+            keyPassword "lyssadev"
+        }
+    }
+    
     buildTypes {
         release {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
