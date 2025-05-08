@@ -71,11 +71,57 @@
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+            
+            <!-- Debug Tools Section -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#3F3F3F"
+                app:cardBackgroundColor="#222222"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Debug Tools"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="These tools are for development and debugging purposes only"
+                        android:textColor="#9E9E9E"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/test_crash_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Test Crash Handler"
+                        app:cornerRadius="8dp"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#CF6679"/>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="MB Loader v1.5"
+                android:text="MB Loader v1.6"
                 android:textColor="#808080"
                 android:textSize="14sp"
                 android:gravity="center"

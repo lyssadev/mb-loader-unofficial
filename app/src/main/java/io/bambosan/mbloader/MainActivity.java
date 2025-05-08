@@ -329,9 +329,39 @@ public class MainActivity extends AppCompatActivity {
     private void setupNavigation() {
         // Setup bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        
+        // Set initial fragment
+        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new HomeFragment())
+                .commit();
+            
+            // Select home item initially
+            bottomNav.setSelectedItemId(R.id.navigation_home);
+        }
+        
+        // Animate nav items using state list animator
+        bottomNav.setItemIconTintList(getColorStateList(R.color.nav_item_color));
+        bottomNav.setItemTextColor(getColorStateList(R.color.nav_item_color));
+        bottomNav.setStateListAnimator(android.animation.AnimatorInflater.loadStateListAnimator(
+                this, R.animator.nav_item_animation));
+                
+        // Track the current selected item to determine animation direction
+        final int[] currentItem = {R.id.navigation_home};
+                
+        // Handle navigation item selection
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
+            int enterAnim = R.anim.slide_in_right;
+            int exitAnim = R.anim.slide_out_left;
             
+            // Determine animation direction based on item position
+            if (getNavigationItemIndex(item.getItemId()) < getNavigationItemIndex(currentItem[0])) {
+                enterAnim = R.anim.slide_in_left;
+                exitAnim = R.anim.slide_out_right;
+            }
+            
+            // Create appropriate fragment
             if (item.getItemId() == R.id.navigation_home) {
                 selectedFragment = new HomeFragment();
             } else if (item.getItemId() == R.id.navigation_settings) {
@@ -339,10 +369,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (selectedFragment != null) {
+                // Update current item
+                currentItem[0] = item.getItemId();
+                
+                // Perform fragment transition with animations
                 getSupportFragmentManager().beginTransaction()
                     .setCustomAnimations(
-                        R.anim.fade_in,
-                        R.anim.fade_out
+                        enterAnim,
+                        exitAnim
                     )
                     .replace(R.id.fragment_container, selectedFragment)
                     .commit();
@@ -350,5 +384,12 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+    
+    // Helper method to get the index of navigation items
+    private int getNavigationItemIndex(int itemId) {
+        if (itemId == R.id.navigation_home) return 0;
+        if (itemId == R.id.navigation_settings) return 1;
+        return 0;
     }
 }

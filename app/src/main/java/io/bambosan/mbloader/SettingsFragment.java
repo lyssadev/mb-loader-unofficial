@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import androidx.fragment.app.Fragment;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class SettingsFragment extends Fragment {
@@ -26,6 +27,12 @@ public class SettingsFragment extends Fragment {
 
         TextInputEditText mcPackageName = rootView.findViewById(R.id.mc_pkgname);
         mcPackageName.setText(MainActivity.MC_PACKAGE_NAME);
+        
+        // Set up crash test button
+        MaterialButton testCrashButton = rootView.findViewById(R.id.test_crash_button);
+        testCrashButton.setOnClickListener(v -> {
+            throw new RuntimeException("Test crash to verify crash handler");
+        });
         
         return rootView;
     }
